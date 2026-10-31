@@ -30,14 +30,14 @@ public final class CreeperFear {
         boolean match;
         if (entity == creeper) {
             match = false;
-        } else if (entity instanceof Player player && CuriosSupport.wearingFearedCurio(player)) {
+        } else if (entity instanceof Player player && CuriosSupport.wearingFearedItem(player)) {
             match = true;
         } else {
             match = Config.fearedIds().contains(BuiltInRegistries.ENTITY_TYPE.getKey(type));
         }
         if (match && MATCHED.incrementAndGet() <= 50) {
             CreepersAway.LOGGER.info("[ca-debug] match: creeper {} fears {} (ids={}, curioIds={}, curiosLoaded={})",
-                    creeper.getUUID(), type, Config.fearedIds(), Config.fearedCurioIds(), CuriosSupport.isCuriosLoaded());
+                    creeper.getUUID(), type, Config.fearedIds(), Config.fearedCurios().ids(), CuriosSupport.isCuriosLoaded());
         }
         return match;
     }
