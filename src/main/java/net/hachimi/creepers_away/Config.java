@@ -65,7 +65,6 @@ public final class Config {
     private Config() {
     }
 
-    /** Immutable id + item-tag matcher built from one config list. */
     public record ItemTargets(Set<ResourceLocation> ids, List<TagKey<Item>> tags) {
         public static final ItemTargets EMPTY = new ItemTargets(Set.of(), List.of());
 
