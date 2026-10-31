@@ -1,5 +1,6 @@
 package net.hachimi.creepers_away.mixin;
 
+import net.hachimi.creepers_away.CreeperFear;
 import net.hachimi.creepers_away.CuriosSupport;
 import net.minecraft.world.entity.ai.goal.SwellGoal;
 import net.minecraft.world.entity.monster.Creeper;
@@ -18,7 +19,7 @@ public abstract class SwellGoalMixin {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void creepers_away$dontSwellNearWearer(CallbackInfo ci) {
-        if (CuriosSupport.hasFearedWearerNearby(this.creeper, 6.0)) {
+        if (CuriosSupport.hasFearedWearerNearby(this.creeper, CreeperFear.FEAR_DISTANCE)) {
             this.creeper.setSwellDir(-1);
             ci.cancel();
         }

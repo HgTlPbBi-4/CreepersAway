@@ -12,6 +12,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -58,6 +60,7 @@ public final class Config {
     private static volatile ItemTargets fearedCurioTargets = ItemTargets.EMPTY;
     private static volatile ItemTargets fearedArmorTargets = ItemTargets.EMPTY;
     private static volatile ItemTargets fearedHeldTargets = ItemTargets.EMPTY;
+    private static volatile boolean anyWearTargets;
 
     private Config() {
     }
@@ -67,7 +70,29 @@ public final class Config {
         public static final ItemTargets EMPTY = new ItemTargets(Set.of(), List.of());
 
         static ItemTargets parse(List<? extends String> entries) {
-            return new ItemTargets(parseIds(entries), parseTags(entries, Registries.ITEM));
+            Set<ResourceLocation> ids = new LinkedHashSet<>();
+            List<TagKey<Item>> tags = new ArrayList<>();
+            for (String raw : entries) {
+                String entry = raw.trim();
+                if (entry.isEmpty()) {
+                    continue;
+                }
+                boolean tag = entry.startsWith("#");
+                ResourceLocation id = ResourceLocation.tryParse(tag ? entry.substring(1) : entry);
+                if (id == null) {
+                    continue;
+                }
+                if (tag) {
+                    tags.add(TagKey.create(Registries.ITEM, id));
+                } else {
+                    ids.add(id);
+                }
+            }
+            return new ItemTargets(Set.copyOf(ids), List.copyOf(tags));
+        }
+
+        public boolean isEmpty() {
+            return ids.isEmpty() && tags.isEmpty();
         }
 
         public boolean matches(ItemStack stack) {
@@ -99,6 +124,11 @@ public final class Config {
         return fearedHeldTargets;
     }
 
+    /** Cheap snapshot flag so the hot paths can bail out when nothing is configured. */
+    public static boolean anyWearTargets() {
+        return anyWearTargets;
+    }
+
     public static void register(IEventBus modBus) {
         modBus.addListener((ModConfigEvent.Loading event) -> reloadIfOurs(event));
         modBus.addListener((ModConfigEvent.Reloading event) -> reloadIfOurs(event));
@@ -112,8 +142,11 @@ public final class Config {
         fearedCurioTargets = ItemTargets.parse(FEARED_CURIOS.get());
         fearedArmorTargets = ItemTargets.parse(FEARED_ARMOR.get());
         fearedHeldTargets = ItemTargets.parse(FEARED_HELD.get());
-        CreepersAway.LOGGER.info("[ca-debug] config loaded: entities={} curios={} armor={} held={}",
-                fearedIds, fearedCurioTargets.ids(), fearedArmorTargets.ids(), fearedHeldTargets.ids());
+        anyWearTargets = !fearedCurioTargets.isEmpty()
+                || !fearedArmorTargets.isEmpty()
+                || !fearedHeldTargets.isEmpty();
+        CreepersAway.LOGGER.debug("creepers_away: loaded {} entity id(s), armour ids {}, held ids {}", 
+                fearedIds.size(), fearedArmorTargets.ids().size(), fearedHeldTargets.ids().size());
     }
 
     private static Set<ResourceLocation> parseIds(List<? extends String> entries) {
@@ -123,16 +156,6 @@ public final class Config {
                 .map(ResourceLocation::tryParse)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableSet());
-    }
-
-    private static <T> List<TagKey<T>> parseTags(List<? extends String> entries, ResourceKey<Registry<T>> registry) {
-        return entries.stream()
-                .map(String::trim)
-                .filter(entry -> entry.startsWith("#"))
-                .map(entry -> ResourceLocation.tryParse(entry.substring(1)))
-                .filter(Objects::nonNull)
-                .map(id -> TagKey.create(registry, id))
-                .collect(Collectors.toUnmodifiableList());
     }
 
     private static boolean isValidEntry(String entry) {
