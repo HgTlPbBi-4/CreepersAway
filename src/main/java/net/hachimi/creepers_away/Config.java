@@ -4,7 +4,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -56,7 +56,7 @@ public final class Config {
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
-    private static volatile Set<ResourceLocation> fearedIds = Set.of();
+    private static volatile Set<Identifier> fearedIds = Set.of();
     private static volatile ItemTargets fearedCurioTargets = ItemTargets.EMPTY;
     private static volatile ItemTargets fearedArmorTargets = ItemTargets.EMPTY;
     private static volatile ItemTargets fearedHeldTargets = ItemTargets.EMPTY;
@@ -65,11 +65,11 @@ public final class Config {
     private Config() {
     }
 
-    public record ItemTargets(Set<ResourceLocation> ids, List<TagKey<Item>> tags) {
+    public record ItemTargets(Set<Identifier> ids, List<TagKey<Item>> tags) {
         public static final ItemTargets EMPTY = new ItemTargets(Set.of(), List.of());
 
         static ItemTargets parse(List<? extends String> entries) {
-            Set<ResourceLocation> ids = new LinkedHashSet<>();
+            Set<Identifier> ids = new LinkedHashSet<>();
             List<TagKey<Item>> tags = new ArrayList<>();
             for (String raw : entries) {
                 String entry = raw.trim();
@@ -77,7 +77,7 @@ public final class Config {
                     continue;
                 }
                 boolean tag = entry.startsWith("#");
-                ResourceLocation id = ResourceLocation.tryParse(tag ? entry.substring(1) : entry);
+                Identifier id = Identifier.tryParse(tag ? entry.substring(1) : entry);
                 if (id == null) {
                     continue;
                 }
@@ -107,7 +107,7 @@ public final class Config {
         }
     }
 
-    public static Set<ResourceLocation> fearedIds() {
+    public static Set<Identifier> fearedIds() {
         return fearedIds;
     }
 
@@ -148,17 +148,17 @@ public final class Config {
                 fearedIds.size(), fearedArmorTargets.ids().size(), fearedHeldTargets.ids().size());
     }
 
-    private static Set<ResourceLocation> parseIds(List<? extends String> entries) {
+    private static Set<Identifier> parseIds(List<? extends String> entries) {
         return entries.stream()
                 .map(String::trim)
                 .filter(entry -> !entry.startsWith("#"))
-                .map(ResourceLocation::tryParse)
+                .map(Identifier::tryParse)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
     private static boolean isValidEntry(String entry) {
         String value = entry.trim();
-        return ResourceLocation.tryParse(value.startsWith("#") ? value.substring(1) : value) != null;
+        return Identifier.tryParse(value.startsWith("#") ? value.substring(1) : value) != null;
     }
 }
