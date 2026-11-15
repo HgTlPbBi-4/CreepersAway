@@ -1,4 +1,4 @@
-package net.hachimi.creepers_away;
+package net.hgtlpbbi.creepers_away;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;

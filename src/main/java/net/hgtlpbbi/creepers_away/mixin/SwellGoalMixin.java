@@ -1,7 +1,7 @@
-package net.hachimi.creepers_away.mixin;
+package net.hgtlpbbi.creepers_away.mixin;
 
-import net.hachimi.creepers_away.CreeperFear;
-import net.hachimi.creepers_away.CuriosSupport;
+import net.hgtlpbbi.creepers_away.CreeperFear;
+import net.hgtlpbbi.creepers_away.CuriosSupport;
 import net.minecraft.world.entity.ai.goal.SwellGoal;
 import net.minecraft.world.entity.monster.Creeper;
 import org.spongepowered.asm.mixin.Final;

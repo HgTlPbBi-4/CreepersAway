@@ -1,4 +1,4 @@
-package net.hachimi.creepers_away;
+package net.hgtlpbbi.creepers_away;
 
 import net.minecraft.world.entity.player.Player;
 import top.theillusivec4.curios.api.CuriosApi;
