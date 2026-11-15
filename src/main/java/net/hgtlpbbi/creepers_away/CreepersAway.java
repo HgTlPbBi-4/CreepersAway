@@ -1,4 +1,4 @@
-package net.hachimi.creepers_away;
+package net.hgtlpbbi.creepers_away;
 
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
